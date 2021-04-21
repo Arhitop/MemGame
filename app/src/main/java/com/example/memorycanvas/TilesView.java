@@ -1,108 +1,88 @@
 package com.example.memorycanvas;
+
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.os.AsyncTask;
-import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
+import androidx.annotation.ColorRes;
+import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
-import java.util.Random;
+import java.util.Collections;
 
+class Card {
+    Paint p = new Paint();
+    private float width;
+    private float height;
+    private boolean visible = true;
+    public int getColor() {
+        return this.color;
+    }
+    public Card(int color) {
+        this.color = color;
+    }
+    public void flWidth(float width) {
+        this.width = width;
+    }
+    public void flHeight(float height) {
+
+        this.height = height;
+    }
+    public boolean visible() {
+        return visible;
+    }
+    public void setVisible(boolean visible) {
+        this.visible = visible;
+    }
+    public void fl_x(float x) {
+        this.x = x;
+    }
+    public void fl_y(float y) {
+        this.y = y;
+    }
+    int color, backColor = R.color.backcard;
+    boolean isOpen = false;
+    float x, y;
+    @SuppressLint("ResourceAsColor")
+    public void draw(Canvas c) {
+        if (isOpen) {
+            p.setColor(color);
+        } else p.setColor(backColor);
+        c.drawRect(x,y, x+width, y+height, p);
+    }
+    public boolean flip (float touch_x, float touch_y) {
+        if (touch_x >= x && touch_x <= x + width && touch_y >= y && touch_y <= y + height) {
+            isOpen = ! isOpen;
+            return true;
+        } else return false;
+    }
+}
 
 public class TilesView extends View {
-
-
-
-    class Card {
-        Paint p = new Paint();
-
-        public Card(int row,int column,int color) {
-            this.color = color;
-            this.row = row;
-            this.column = column;
-
-        }
-
-        int color, backColor = Color.DKGRAY;
-        boolean isOpen = false; // цвет карты
-        //float x, y, width, height;
-        int row,column;
-
-        public void draw(Canvas c) {
-            // нарисовать карту в виде цветного прямоугольника
-            float left,top,right,bottom;
-            float [] coord = getCoordinations(row,column);
-            left = coord[0];
-            top = coord[1];
-            right = coord[2];
-            bottom = coord[3];
-            if (isOpen) {
-                p.setColor(color);
-            } else p.setColor(backColor);
-            c.drawRect(left,top,right,bottom,p);
-        }
-
-        public float[] getCoordinations(int row,int column){
-            float [] coords  = {column * (width / 4) + (width / 4) / 10, row * (height / 4) + (height / 4) / 10, column * (width / 4) + width / 4 - (width / 4) / 10, row * (height / 4) + height / 4 - (height / 4) / 10};
-            return coords;
-        }
-
-        public boolean flip (float touch_x, float touch_y) {
-
-            float [] coordinates = getCoordinations(row,column);
-            if (touch_x >= coordinates[0] && touch_x <= coordinates[2] && touch_y >= coordinates[1] && touch_y <= coordinates[3]) {
-                //isOpen = ! isOpen;
-                return true;
-            } else return false;
-        }
-
-    }
-
-
-    // пауза для запоминания карт
-    final int PAUSE_LENGTH = 2; // в секундах
-    final int PAUSE_LENGTH_SHORT = 1; // в секундах
+    final int PAUSE_LENGTH = 2;
     boolean isOnPauseNow = false;
-    int state = 0;
-    Context context;
-    Card c1 = null;
-    Card c2 = null;
-
-    // число открытых карт
+    int[] tiles = new int[]{Color.CYAN, Color.RED, Color.BLACK, Color.MAGENTA, Color.BLUE, Color.GREEN, Color.YELLOW, Color.TRANSPARENT, Color.DKGRAY, Color.WHITE, Color.LTGRAY, Color.GRAY};
     int openedCard = 0;
-
-    ArrayList<Card> cards = new ArrayList<>();
-    int cards_amount = 0;
-
-    int width, height; // ширина и высота канвы
-
+    ArrayList<Card> cards;
+    int width, height;
     public TilesView(Context context) {
         super(context);
     }
 
     public TilesView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        // 1) заполнить массив tiles случайными цветами
-        // сгенерировать поле 2*n карт, при этом
-        // должно быть ровно n пар карт разных цветов
         newGame();
-
-
-        cards_amount = cards.size();
-        state = 1;
-
-//        cards.add(new Card(0,0, 200, 150, Color.YELLOW));
-//        cards.add(new Card(200+50, 0, 200 + 200 + 50, 150, Color.YELLOW));
-//
-//        cards.add(new Card(0,200, 200, 150 + 200, Color.RED));
-//        cards.add(new Card(200+50, 200, 200 + 200 + 50, 150+200, Color.RED));
     }
 
     @Override
@@ -110,177 +90,109 @@ public class TilesView extends View {
         super.onDraw(canvas);
         width = canvas.getWidth();
         height = canvas.getHeight();
-        // 2) отрисовка плиток
-        // задать цвет можно, используя кисть
-        Paint p = new Paint();
+
+        float cardWidth = (width * 0.87f) / 4;
+        float cardHeight = (height * 0.88f) / 6;
+        float indentWidth = width * 0.1f / 4;
+        float indentHeight = height * 0.1f / 6;
+        int counter = 0;
+        for (int i = 0; i < 4; i++){
+            for (int j = 0; j < 6; j++) {
+                Card CdHold = cards.get(counter);
+                if (!CdHold.visible()){
+                    CdHold.flWidth(0);
+                    CdHold.flHeight(0);
+                    counter++;
+                    continue;
+                }
+                CdHold.flHeight(cardHeight);
+                CdHold.flWidth(cardWidth);
+                CdHold.fl_x(cardWidth * i + indentWidth * (i + 1));
+                CdHold.fl_y(cardHeight * j + indentHeight * (j + 1));
+                counter++;
+            }
+        }
         for (Card c: cards) {
             c.draw(canvas);
         }
     }
 
-    public boolean checkOpenCardsEqual(Card card1, Card card2){
-        if (card1.color==card2.color){
-            return true;
+    private boolean Winner(){
+        for (Card c : cards){
+            if (c.visible())
+                return true;
         }
-        else {
-            return false;
-        }
+        return false;
     }
-
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        // 3) получить координаты касания
         int x = (int) event.getX();
         int y = (int) event.getY();
-        // 4) определить тип события
-        if (state == 1 || state == 3) {
-            if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                // палец коснулся экрана
+        if (event.getAction() == MotionEvent.ACTION_DOWN && !isOnPauseNow)
+        {
+            for (Card c: cards) {
 
-                for (Card c : cards) {
+                if (openedCard == 0) {
                     if (c.flip(x, y)) {
-                        if (state == 1) {
-                            if (c1 == c) {
-                                return true;
-                            }
-                            c1 = c;
-                            c1.isOpen = true;
-                            state = 3;
-                            invalidate();
-                        } else if (state == 3) {
-                            if (c1==c){
-                                return true;
-                            }
-                            c2 = c;
-                            c2.isOpen = true;
-                            if (checkOpenCardsEqual(c1, c2)) {
-                                state = 4;
+                        openedCard ++;
+                        invalidate();
+                        return true;
+                    }
+                }
 
-                            }
-                            else {
-                                state = 5;
-                            }
-                            invalidate();
-                            PauseTask task = new PauseTask();
-                            task.execute(PAUSE_LENGTH);
-                            //isOnPauseNow = true;
-
-
-                        }
-                        Log.d("mytag", "card flipped: " + openedCard);
-                        break;
+                if (openedCard == 1) {
+                    if (c.flip(x, y)) {
+                        openedCard ++;
+                        invalidate();
+                        PauseTask task = new PauseTask();
+                        task.execute(PAUSE_LENGTH);
+                        isOnPauseNow = true;
+                        return true;
                     }
                 }
 
             }
-
         }
-
         return true;
     }
 
-    public void changeState(){
-        if (state == 0){
-            //newGame();
-
-
-
-            state = 1;
-        }
-        else if (state==4){
-            cards.remove(c1);
-            cards.remove(c2);
-            if (cards.size()==0){
-                Toast toast = Toast.makeText(context, "Вы выиграли!", Toast.LENGTH_SHORT);
-                toast.show();
-                state = 0;
-
-            }
-            else {
-                state = 1;
-            }
-        }
-        else if (state == 5){
-            state = 1;
-            c1.isOpen = false;
-            c2.isOpen = false;
-            c1 = null;
-            c2 = null;
-        }
-        invalidate();
-    }
-
     public void newGame() {
-        Random r = new Random();
-        state = 1;
-        ArrayList<Card> cards2 = new ArrayList<>();
-        int current_color = Color.rgb(r.nextInt(255),r.nextInt(255),r.nextInt(255));
-        int k=0;
-
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                if (k==2){
-                    current_color = Color.rgb(r.nextInt(255),r.nextInt(255),r.nextInt(255));
-                    k=0;
-                }
-                cards2.add(new Card(i,j,current_color));
-                k++;
-            }
+        cards = new ArrayList<>();
+        for (int i = 0; i < 12; i++) {
+            cards.add(new Card(tiles[i]));
+            cards.add(new Card(tiles[i]));
         }
-        for (int i = 0; i < 8; i++) {
-            current_color = Color.rgb(r.nextInt(255),r.nextInt(255),r.nextInt(255));
-            int index = r.nextInt(cards2.size()-1);
-            cards2.get(index).color = current_color;
-
-            cards.add(cards2.get(index));
-            cards2.remove(index);
-
-            if (cards2.size() == 1){
-                index = 0;
-            }
-            else {
-                index = r.nextInt(cards2.size()-1);
-            }
-
-
-            cards2.get(index).color = current_color;
-
-            cards.add(cards2.get(index));
-            cards2.remove(index);
-        }
+        Collections.shuffle(cards);
         invalidate();
-
-
-
     }
 
     class PauseTask extends AsyncTask<Integer, Void, Void> {
         @Override
-
         protected Void doInBackground(Integer... integers) {
-
-                Log.d("mytag", "Pause started");
-                try {
-                    Thread.sleep(integers[0] * 500); // передаём число секунд ожидания
-                } catch (InterruptedException e) {
-                }
-                Log.d("mytag", "Pause finished");
-
-
-
+            try {
+                Thread.sleep(integers[0] * 1000);
+            } catch (InterruptedException e) {}
             return null;
         }
-
-        // после паузы, перевернуть все карты обратно
-
-
         @Override
         protected void onPostExecute(Void aVoid) {
-
+            ArrayList<Card> CdHold = new ArrayList<>();
+            for (Card c: cards) {
+                if (c.isOpen) {
+                    CdHold.add(c);
+                    c.isOpen = false;
+                }
+            }
+            if (CdHold.get(0).getColor() == CdHold.get(1).getColor()){
+                CdHold.get(0).setVisible(false);
+                CdHold.get(1).setVisible(false);
+            }
+            if (!Winner()){
+                Toast.makeText(getContext(), "Вы выиграли!!!", Toast.LENGTH_LONG).show();
+            }
             openedCard = 0;
             isOnPauseNow = false;
             invalidate();
-            changeState();
         }
     }
 }
