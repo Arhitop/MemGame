@@ -5,17 +5,17 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Point;
+import android.graphics.Point; //можно убрать этот import
 import android.os.AsyncTask;
 import android.util.AttributeSet;
-import android.util.Log;
-import android.view.Display;
+import android.util.Log; //можно убрать этот import
+import android.view.Display; //можно убрать этот import
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Button;
+import android.widget.Button;  //можно убрать этот import
 import android.widget.Toast;
 
-import androidx.annotation.ColorRes;
+import androidx.annotation.ColorRes; //можно убрать этот import
 import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
@@ -51,7 +51,7 @@ class Card {
     public void fl_y(float y) {
         this.y = y;
     }
-    int color, backColor = R.color.backcard;
+    int color, backColor = R.color.backcard; //заменить переменную
     boolean isOpen = false;
     float x, y;
     @SuppressLint("ResourceAsColor")
@@ -69,11 +69,11 @@ class Card {
     }
 }
 
-public class TilesView extends View {
+public class TilesView extends View { //Надо заменить белый цвет карточки, так как при нажатии он сливается с уже открытыми карточками
     final int PAUSE_LENGTH = 2;
     boolean isOnPauseNow = false;
-    int[] tiles = new int[]{Color.CYAN, Color.RED, Color.BLACK, Color.MAGENTA, Color.BLUE, Color.GREEN, Color.YELLOW, Color.TRANSPARENT, Color.DKGRAY, Color.WHITE, Color.LTGRAY, Color.GRAY};
-    int openedCard = 0;
+    int[] tiles = new int[]{Color.CYAN, Color.RED, Color.BLACK, Color.MAGENTA, Color.BLUE, Color.GREEN, Color.YELLOW, Color.TRANSPARENT, Color.DKGRAY, Color.WHITE, Color.LTGRAY, Color.GRAY}; 
+    int openCard = 0;
     ArrayList<Card> cards;
     int width, height;
     public TilesView(Context context) {
@@ -132,17 +132,17 @@ public class TilesView extends View {
         {
             for (Card c: cards) {
 
-                if (openedCard == 0) {
+                if (openCard == 0) {
                     if (c.flip(x, y)) {
-                        openedCard ++;
+                        openCard ++;
                         invalidate();
                         return true;
                     }
                 }
 
-                if (openedCard == 1) {
+                if (openCard == 1) {
                     if (c.flip(x, y)) {
-                        openedCard ++;
+                        openCard ++;
                         invalidate();
                         PauseTask task = new PauseTask();
                         task.execute(PAUSE_LENGTH);
@@ -188,9 +188,9 @@ public class TilesView extends View {
                 CdHold.get(1).setVisible(false);
             }
             if (!Winner()){
-                Toast.makeText(getContext(), "Вы выиграли!!!", Toast.LENGTH_LONG).show();
+                Toast.makeText(getContext(), "Победа", Toast.LENGTH_LONG).show();
             }
-            openedCard = 0;
+            openCard = 0;
             isOnPauseNow = false;
             invalidate();
         }
