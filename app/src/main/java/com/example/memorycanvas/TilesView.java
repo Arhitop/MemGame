@@ -5,17 +5,17 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Point; //можно убрать этот import
+//убрал import
 import android.os.AsyncTask;
 import android.util.AttributeSet;
-import android.util.Log; //можно убрать этот import
-import android.view.Display; //можно убрать этот import
+//убрал import
+//убрал import
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Button;  //можно убрать этот import
+//убрал import
 import android.widget.Toast;
 
-import androidx.annotation.ColorRes; //можно убрать этот import
+//убрал import
 import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
@@ -51,7 +51,7 @@ class Card {
     public void fl_y(float y) {
         this.y = y;
     }
-    int color, backColor = R.color.backcard; //заменить переменную
+    int color, backColor = R.color.unknown; //заменил  переменную
     boolean isOpen = false;
     float x, y;
     @SuppressLint("ResourceAsColor")
@@ -69,7 +69,7 @@ class Card {
     }
 }
 
-public class TilesView extends View { //Надо заменить белый цвет карточки, так как при нажатии он сливается с уже открытыми карточками
+public class TilesView extends View {
     final int PAUSE_LENGTH = 2;
     boolean isOnPauseNow = false;
     int[] tiles = new int[]{Color.CYAN, Color.RED, Color.BLACK, Color.MAGENTA, Color.BLUE, Color.GREEN, Color.YELLOW, Color.TRANSPARENT, Color.DKGRAY, Color.WHITE, Color.LTGRAY, Color.GRAY}; 
@@ -132,7 +132,7 @@ public class TilesView extends View { //Надо заменить белый ц�
         {
             for (Card c: cards) {
 
-                if (openCard == 0) {
+                if (openCard == 0) { //сократил название переменной
                     if (c.flip(x, y)) {
                         openCard ++;
                         invalidate();
@@ -188,7 +188,7 @@ public class TilesView extends View { //Надо заменить белый ц�
                 CdHold.get(1).setVisible(false);
             }
             if (!Winner()){
-                Toast.makeText(getContext(), "Победа", Toast.LENGTH_LONG).show();
+                Toast.makeText(getContext(), "Победа", Toast.LENGTH_LONG).show(); //заменил финальное уведомление
             }
             openCard = 0;
             isOnPauseNow = false;
