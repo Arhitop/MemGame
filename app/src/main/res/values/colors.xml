@@ -3,5 +3,5 @@
     <color name="colorPrimary">#370067</color> //заменил цвета на более контрастные
     <color name="colorPrimaryDark">#4A0101</color>
     <color name="colorAccent">#00FFE9</color>
-    <color name="unknown" />
+    <color name="backcard" /> //заменить переменную
 </resources>
